@@ -1,0 +1,103 @@
+<div class = "container-fluid" style="width:100%;height:100%;">
+
+    <!-- Navbar -->
+    <div class="row">
+        <div class="col-md-12">
+            <nav class="navbar navbar-expand navbar-light bg-light" ng-controller="NavbarController">
+                <a class="navbar-brand" href="#">Online Homework Journal</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <!-- left hand -->
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item">
+                                <a class = 'nav-link' href='#' data-toggle="modal" data-target="#configModal" >Settings</a>
+                            </li>
+                        </ul>
+                        <!-- right hand -->
+                        <form class="form-inline my-2 my-lg-0">
+                            <input class="form-control mr-sm-2" type="date" ng-model="date" ng-change="dateChange()">
+                        </form>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="row align-items-center justify-content-center" style="width:100%;min-height:90%;">
+        <div class = "col-md-5" ng-controller="TableController">
+            <h3 class="text-center">{{displayDate}}</h3>
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Subject</th>
+                        <th scope="col">Homework</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        <tr ng-repeat="item in homework">
+                            <th scope="row">{{item.subject}}</th>
+                            <td>{{item.homework}} <span ng-click="edit(item.code,item.subject,item.homework)"><i style="cursor: pointer;" class="far fa-edit fa-pull-right"></i></span></td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Config Modal -->
+<div class = "modal" id="configModal" tabindex="-1" role="dialog" aria-labelledby="configModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="configModalLabel">Settings</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" ng-controller="ConfigController">
+                <form>
+                    <!-- todo: more years -->
+                    <div class = "form-group">
+                        <label for = "yearSelector">Year:</label>
+                        <br>
+                        <select class = "custom-select" id="yearSelector" ng-change = "saveConfig()" ng-options= "year.name for year in years track by year.id" ng-model="userConfig.year"></select>
+                    </div>
+
+                    <!-- todo: if multiple years, add different classes -->
+                    <div class = "form-group">
+                        <label for = "baseClassSelector">Base Class:</label>
+                        <br>
+                        <select class = "custom-select" id="baseClassSelector" ng-change = "saveConfig()" ng-options = "baseClass.name for baseClass in baseClasses track by baseClass.id" ng-model="userConfig.baseClass"></select>
+                    </div>
+
+                    <!-- todo: add more science classes --> 
+                    <div class = "form-group">
+                        <label for = "scienceSelector">Science Class:</label>
+                        <br>
+                        <select class = "custom-select" id="scienceSelector" ng-change = "saveConfig()" ng-options = "scienceClass.name for scienceClass in scienceClasses track by scienceClass.id" ng-model="userConfig.sci"></select>
+                    </div>
+
+                    <!-- todo: change label for different years -->
+                    <div class = "form-group">
+                        <label for = "option4Selector">Option (on Mondays &amp; Thursdays):</label>
+                        <br>
+                        <select class = "custom-select" id = "option4Selector" ng-change = "saveConfig()" ng-options="optionFour.name for optionFour in optionFours track by optionFour.id" ng-model="userConfig.option4"></select>
+                    </div>
+
+                    <!-- todo: change label for different years -->
+                    <div class = "form-group">
+                        <label for = "option6Selector">Option (on Tuesdays &amp; Fridays):</label>
+                        <br>
+                        <select class = "custom-select" id = "option6Selector" ng-change = "saveConfig()" ng-options="optionSix.name for optionSix in optionSixes track by optionSix.id" ng-model = "userConfig.option6"></select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+  </div>
+</div>
