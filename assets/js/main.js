@@ -234,8 +234,15 @@ angular.module('homeworkJournal',[])
             })
         })
        //Navbar controller. Mostly for handling the date picker
-       .controller('NavbarController', function ($scope, $rootScope){
+       .controller('NavbarController', function ($scope, $rootScope, ConfigService){
            $scope.date = Date.today()
+
+           $scope.userConfig = ConfigService.getUserConfig()
+
+           $scope.$on('refresh', function (e) {
+               $scope.userConfig = ConfigService.getUserConfig()
+           })
+
            $scope.dateChange = function (){
                $rootScope.$broadcast('dateChange',{date:$scope.date})
            }
