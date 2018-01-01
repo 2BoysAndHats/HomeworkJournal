@@ -3,12 +3,17 @@ function dater (d){
 }
 
 
+schoolYears = [
+    {name: '1st year', id: '1'},
+    {name: '2nd year', id: '2'},
+    {name: '3rd year', id: '3'},
+    {name: 'TY', id: '4'},
+    {name: '5th year', id: '5'},
+    {name: '6th year', id: '6'},
+]
+
 /* START DEFINE CLASSES */
 schoolClasses = {
-            years: [
-                {name: '1st year', id: 'y1'}
-            ],
-
             baseClasses: [
                 {name: 'da Vinci', id: 'daVinci'}
             ],
@@ -20,7 +25,7 @@ schoolClasses = {
                 {name: 'Science - Alison (3.4)', id: '3.4'},
             ],
 
-            optionFours: [
+            option1s: [
                 {name: 'T.G. - Paddy C', id: '4.1'},
                 {name: 'Art - Lynn', id: '4.2'},
                 {name: 'Business - Mike', id: '4.3'},
@@ -32,7 +37,7 @@ schoolClasses = {
                 {name: 'T.G. - Paddy W', id: '4.9'},
             ],
 
-            optionSixes: [
+            option2s: [
                 {name: 'T.G. - Adrian C', id: '6.1'},
                 {name: 'Home Ec. - Olivia', id: '6.2'},
                 {name: 'Music - Susan', id: '6.5'},
@@ -48,7 +53,43 @@ schoolClasses = {
 
 //This takes internal class codes and turns them into capatilized names
 function parseHomework (hw,uc){
+
+    console.log (window.schoolClasses)
+    console.log (hw)
+    console.log (uc)
+
     hw.forEach(function (h) {
+
+        //Wiki style: show the most recent contribution
+        contributors = Object.keys(h.homework)
+        contributors.sort(function (a,b) {
+            aDate = h.homework[a].date;
+            bDate = h.homework[b].date;
+
+            if (aDate < bDate) {
+                return 1;
+            }
+            if (aDate > bDate) {
+                return -1;
+            }
+            if (aDate == bDate) {
+                return 0;
+            }      
+        });
+
+        //before we override it, create a backup oldHomework object in order
+        a = {}
+        contributors.forEach(function (c) {
+            a[c] = h.homework[c];
+        })
+
+        h.oldHomework = a;
+        
+        if (h.homework[contributors[0]]) {
+           h.homework = h.homework[contributors[0]].homework;
+        }
+    
+
         subject = h.subject;
 
         
@@ -73,9 +114,10 @@ function parseHomework (hw,uc){
             h.code = code;
 
             //Loop through all possible ids
-            groups = Object.keys(schoolClasses)
+            groups = Object.keys(window.schoolClasses)
             groups.forEach(function (group) {
-                g = schoolClasses[group]
+                g = window.schoolClasses[group]
+                console.log(g)
                 g.forEach(function (pair) {
                     if (pair.id == code){
                         h.subject = pair.name;
@@ -88,26 +130,71 @@ function parseHomework (hw,uc){
 }
 
 angular.module('homeworkJournal',[])
-       .controller('TableController', function ($scope, $rootScope, $http){
+        //Make sure our requests have the auth code
+       .config(function ($httpProvider) {
+            $httpProvider.defaults.withCredentials = true;
+            //rest of route code
+        })
+       .service('ServerService', function ($http){
+            this.pullHomework = function (d,userConfig,cb) {
+                //Make user config useable
+                uc = {}
+                keys = Object.keys(userConfig)
+                keys.forEach(function (k){
+                    uc[k] = userConfig[k].id;
+                })
+
+                //Pull homework from server
+                $http.post('/homework/getHomework', {userConfig: uc, date: d})
+                     .then( function (res) {
+                        cb(res.data,uc)
+                     })
+            }
+
+            this.getYearClasses = function (num,cb){
+                $http.get('/year/?number=' + num)
+                     .then(function (res) {
+                        //0, as number should be unique!
+                        cb(res.data[0])
+                     })
+            }
+        })
+       .service('ConfigService', function () {
+           this.getUserConfig = function () {
+                //Attempt to recover config
+                if (localStorage.getItem('userConfig')){
+                    return JSON.parse( localStorage.getItem('userConfig') );
+                } else {
+                    
+                    setTimeout(function (){
+                        alert('Hi! If this is your first time, please tell me what classes you have by clicking the "Settings" button.')
+                    },200);
+
+                    return {
+                        year: schoolYears[0],
+                        baseClass: schoolClasses.baseClasses[0],
+                        sci: schoolClasses.scienceClasses[0],
+                        option1: schoolClasses.option1s[0],
+                        option2: schoolClasses.option2s[0],
+                    }
+                }
+           }
+       })
+       .controller('TableController', function ($scope, $rootScope, $http, ServerService, ConfigService){
+
+            $scope.userConfig = ConfigService.getUserConfig()
+            
             //Initilize with today's date
             $scope.displayDate = dater(Date.today());
             $scope.date = Date.today()
 
-            //Attempt to recover config
-            if (localStorage.getItem('userConfig')){
-                $scope.userConfig = JSON.parse( localStorage.getItem('userConfig') );
-            } else {   
-                $scope.userConfig = {
-                    year: schoolClasses.years[0],
-                    baseClass: schoolClasses.baseClasses[0],
-                    sci: schoolClasses.scienceClasses[0],
-                    option4: schoolClasses.optionFours[0],
-                    option6: schoolClasses.optionSixes[0],
-                }
-            }
+            $scope.edit = function (item){
 
-            $scope.edit = function (code,subj,currentHw){
-                hw = prompt ("Homework for " + subj,currentHw)
+                code = item.code;
+                subj = item.subject;
+                currentHw = item.homework;
+
+                hw = prompt ("Homework for " + subj, currentHw)
 
                 if (hw != undefined){
                     data = {homework: hw, date: $scope.date, subj: code}
@@ -116,7 +203,6 @@ angular.module('homeworkJournal',[])
                     $http.post('/homework/editHomework',data).then(function (res) {
                         //Refresh the table
                         $scope.pullHomework($scope.date)
-
                         alert ('Edited the homework successfully')
                     }, function (res) {
                         alert ('Error while editing homework')
@@ -124,63 +210,86 @@ angular.module('homeworkJournal',[])
                 }
             }
 
-            $scope.pullHomework = function (d) {
-                
-                //Make user config useable
-                uc = {}
-                keys = Object.keys($scope.userConfig)
-                keys.forEach(function (k){
-                    uc[k] = $scope.userConfig[k].id;
-                })
+            $scope.setModal = function (m) {
+                $scope.modalSelected = m;
+            }
 
-                //Pull homework from server
-                $http.post('/homework/getHomework', {userConfig: uc, date: d})
-                     .then( function (res) {
-                        $scope.homework = parseHomework(res.data,uc);
-                     })
+            $scope.pullHomework = function (d) {
+                ServerService.pullHomework(d,$scope.userConfig,function (hw,uc){
+                    $scope.homework = parseHomework(hw,uc);
+                })
             }
 
             $scope.pullHomework(Date.today())
 
-           $scope.$on('dateChange',function (event,message){
-               $scope.displayDate = dater (message.date)
-               $scope.date = message.date;
-               $scope.pullHomework(message.date)
-           })
+            $scope.$on('dateChange',function (event,message){
+                $scope.displayDate = dater (message.date)
+                $scope.date = message.date;
+                $scope.pullHomework(message.date)
+            })
 
-           $scope.$on('refresh',function (e,m){
-                $scope.userConfig = JSON.parse( localStorage.getItem('userConfig') );
-                $scope.pullHomework($scope.date)
-           })
-       })
+            $scope.$on('refresh',function (e,m){
+                    $scope.userConfig = ConfigService.getUserConfig()
+                    $scope.pullHomework($scope.date)
+            })
+        })
        //Navbar controller. Mostly for handling the date picker
-       .controller('NavbarController', function ($scope,$rootScope){
+       .controller('NavbarController', function ($scope, $rootScope){
            $scope.date = Date.today()
            $scope.dateChange = function (){
                $rootScope.$broadcast('dateChange',{date:$scope.date})
            }
        })
-       .controller('ConfigController', function ($scope,$rootScope){
+       .controller('ConfigController', function ($scope, $rootScope, ServerService, ConfigService){
 
-            //Attempt to recover config
-            if (localStorage.getItem('userConfig')){
-                $scope.userConfig = JSON.parse( localStorage.getItem('userConfig') );
-            } else {   
-                $scope.userConfig = {
-                    year: schoolClasses.years[0],
-                    baseClass: schoolClasses.baseClasses[0],
-                    sci: schoolClasses.scienceClasses[0],
-                    option4: schoolClasses.optionFours[0],
-                    option6: schoolClasses.optionSixes[0],
-                }
+            $scope.userConfig = ConfigService.getUserConfig()
+
+            //Load year classses from server
+            ServerService.getYearClasses($scope.userConfig.year.id, function (yearInfo) {
+                //window.schoolClasses = yearInfo;
+                window.schoolClasses.baseClasses = yearInfo.baseClasses;
+                window.schoolClasses.scienceClasses = yearInfo.scienceClasses;
+                window.schoolClasses.option1s = yearInfo.option1s;
+                window.schoolClasses.option2s = yearInfo.option2s;
+
+                //Expose school classes to the scope
+                $scope.years = schoolYears;
+                $scope.baseClasses = schoolClasses.baseClasses;
+                $scope.scienceClasses = schoolClasses.scienceClasses;
+                $scope.option1s = schoolClasses.option1s;
+                $scope.option2s = schoolClasses.option2s;
+            
+            });
+
+            $scope.onYearChange = function () {
+                //Load year classses from server
+                ServerService.getYearClasses($scope.userConfig.year.id, function (yearInfo) {
+                    //window.schoolClasses = yearInfo;
+                    window.schoolClasses.baseClasses = yearInfo.baseClasses;
+                    window.schoolClasses.scienceClasses = yearInfo.scienceClasses;
+                    window.schoolClasses.option1s = yearInfo.option1s;
+                    window.schoolClasses.option2s = yearInfo.option2s;
+
+                    $scope.userConfig = {
+                        year: $scope.userConfig.year,
+                        baseClass: schoolClasses.baseClasses[0],
+                        sci: schoolClasses.scienceClasses[0],
+                        option1: schoolClasses.option1s[0],
+                        option2: schoolClasses.option2s[0],
+                    }
+
+                    //Expose school classes to the scope
+                    $scope.years = schoolYears;
+                    $scope.baseClasses = schoolClasses.baseClasses;
+                    $scope.scienceClasses = schoolClasses.scienceClasses;
+                    $scope.option1s = schoolClasses.option1s;
+                    $scope.option2s = schoolClasses.option2s;
+
+                    $scope.saveConfig()
+
+                });
             }
 
-            //Expose school classes to the scope
-            $scope.years = schoolClasses.years;
-            $scope.baseClasses = schoolClasses.baseClasses;
-            $scope.scienceClasses = schoolClasses.scienceClasses;
-            $scope.optionFours = schoolClasses.optionFours;
-            $scope.optionSixes = schoolClasses.optionSixes;
 
             $scope.saveConfig = function () {
                 localStorage.setItem('userConfig',JSON.stringify($scope.userConfig))

@@ -97,13 +97,33 @@ module.exports = {
     },
 
     editHomework: function (req,res){
+
+        editorName = req.session.user_info.name;
+
         //Get the homework
         params = req.allParams()
 
         HomeworkEntry.findOrCreate({date: params.date, classId: params.subj}).exec(function (err,h){
             if (err) return res.serverError()
 
-            h.homework = params.homework;
+            //h.homework = params.homework;
+
+            //New wiki style version
+            h.homework = h.homework || {}
+
+            h.homework[editorName] = {homework: params.homework, date: Date.now()};
+
+            //Delete if hw is blank
+            if (params.homework.trim() == ""){
+                delete h.homework[editorName]
+            }
+
+            if (JSON.stringify(h.homework) == "{}"){ 
+               HomeworkEntry.destroy({id: h.id}).exec(function (err){
+                    if (err) return res.serverError()
+                    return res.json();
+                })
+            }
 
             h.save()
         }) 
@@ -111,4 +131,3 @@ module.exports = {
         res.json()
     }
 };
-

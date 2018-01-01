@@ -13,7 +13,10 @@
                         <!-- left hand -->
                         <ul class="navbar-nav mr-auto">
                             <li class="nav-item">
-                                <a class = 'nav-link' href='#' data-toggle="modal" data-target="#configModal" >Settings</a>
+                                <a class = 'nav-link' href='#' data-toggle="modal" data-target="#configModal" id = "settingsButton">Settings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class = 'nav-link' href='/auth/logout' >Logout</a>
                             </li>
                         </ul>
                         <!-- right hand -->
@@ -29,7 +32,7 @@
     <div class="row align-items-center justify-content-center" style="width:100%;min-height:90%;">
         <div class = "col-md-5" ng-controller="TableController">
             <h3 class="text-center">{{displayDate}}</h3>
-            <table class="table table-bordered table-hover">
+            <table class="table table-bordered table-hover" id="mainTable">
                 <thead>
                     <tr>
                         <th scope="col">Subject</th>
@@ -39,10 +42,43 @@
                 <tbody>
                         <tr ng-repeat="item in homework">
                             <th scope="row">{{item.subject}}</th>
-                            <td>{{item.homework}} <span ng-click="edit(item.code,item.subject,item.homework)"><i style="cursor: pointer;" class="far fa-edit fa-pull-right"></i></span></td>
+                            <td>{{item.homework}} <span ng-click="edit(item)"><i style="cursor: pointer;" class="far fa-edit fa-pull-right"></i></span> <a href = "#" ng-click="setModal(item.oldHomework)" data-toggle="modal" data-target="#otherHomeworkModal"><span style="cursor: pointer;" class="fas fa-users fa-pull-right"></span> </a> </td>
                         </tr>
                 </tbody>
             </table>
+
+            <!-- Other homework modal -->
+            <div class="modal fade" id="otherHomeworkModal" tabindex="-1" role="dialog" aria-labelledby="otherHomeworkModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="otherHomeworkModalLabel">Other users' homework</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">   
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Homework</th>    
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="(user,userHw) in modalSelected">
+                                <td>{{user}}</td>
+                                <td>{{userHw.homework}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+            </div>
         </div>
     </div>
 </div>
@@ -63,7 +99,7 @@
                     <div class = "form-group">
                         <label for = "yearSelector">Year:</label>
                         <br>
-                        <select class = "custom-select" id="yearSelector" ng-change = "saveConfig()" ng-options= "year.name for year in years track by year.id" ng-model="userConfig.year"></select>
+                        <select class = "custom-select" id="yearSelector" ng-change = "onYearChange()" ng-options= "year.name for year in years track by year.id" ng-model="userConfig.year"></select>
                     </div>
 
                     <!-- todo: if multiple years, add different classes -->
@@ -82,16 +118,16 @@
 
                     <!-- todo: change label for different years -->
                     <div class = "form-group">
-                        <label for = "option4Selector">Option (on Mondays &amp; Thursdays):</label>
+                        <label for = "option1Selector">Option 1:</label>
                         <br>
-                        <select class = "custom-select" id = "option4Selector" ng-change = "saveConfig()" ng-options="optionFour.name for optionFour in optionFours track by optionFour.id" ng-model="userConfig.option4"></select>
+                        <select class = "custom-select" id = "option1Selector" ng-change = "saveConfig()" ng-options="option1.name for option1 in option1s track by option1.id" ng-model="userConfig.option1"></select>
                     </div>
 
                     <!-- todo: change label for different years -->
                     <div class = "form-group">
-                        <label for = "option6Selector">Option (on Tuesdays &amp; Fridays):</label>
+                        <label for = "option2Selector">Option 2:</label>
                         <br>
-                        <select class = "custom-select" id = "option6Selector" ng-change = "saveConfig()" ng-options="optionSix.name for optionSix in optionSixes track by optionSix.id" ng-model = "userConfig.option6"></select>
+                        <select class = "custom-select" id = "option2Selector" ng-change = "saveConfig()" ng-options="option2.name for option2 in option2s track by option2.id" ng-model = "userConfig.option2"></select>
                     </div>
                 </form>
             </div>
