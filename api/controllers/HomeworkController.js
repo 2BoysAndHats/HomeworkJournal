@@ -21,6 +21,22 @@ module.exports = {
 
         //pull config
         params = req.allParams()
+
+        //make sure everything is there
+        if (!params.date || !params.userConfig){
+            return res.json([])
+        }
+
+        //make sure date is valid
+        if (!Date.parse(params.date)){
+            return res.json([])
+        }
+
+        //make sure everything in userConfig is there
+        if (!params.userConfig.baseClass || !params.userConfig.sci || !params.userConfig.option1 || !params.userConfig.option2) {
+            return res.json([])
+        }
+
         userConfig = params.userConfig;
 
         //get date
@@ -39,6 +55,10 @@ module.exports = {
             'baseClassId': userConfig.baseClass
         }).exec(function (err, baseClass){
             if (err) throw err;
+
+            if (!baseClass) {
+                return res.json ([])
+            }
 
             //Decode template
             template = JSON.parse(baseClass.classes)
@@ -102,6 +122,17 @@ module.exports = {
 
         //Get the homework
         params = req.allParams()
+
+        //check date
+        if (!Date.parse(params.date)){
+            return res.json([])
+        }
+
+        //check if other params are there
+        if (!params.homework || !params.subj) {
+            return res.json({})
+        }
+
         homeworkStr = params.homework.trim()
 
         HomeworkEntry.findOrCreate({date: params.date, classId: params.subj}).exec(function (err,h){

@@ -20,6 +20,6 @@ module.exports = {
   // models: {
   //   connection: 'someMongodbServer'
   // }
-  port: 80,
+  port: 8080,
 
 };

@@ -1,5 +1,5 @@
 function dater (d){
-    return d.toString('dddd') + ' the ' + d.toString('ddS of MMMM')
+    return d.toString('dddd') + ' the ' + d.toString('dS of MMMM')
 }
 
 
