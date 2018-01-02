@@ -17,15 +17,19 @@ haveShownAlert = false;
 /* START DEFINE CLASSES */
 schoolClasses = {
             baseClasses: [
+                {name: 'da Vinci', id: 'daVinci'}
             ],
 
             scienceClasses: [
+                {name: 'Science - Leona (3.1)', id: '3.1'},
             ],
 
             option1s: [
+                {name: 'T.G. - Paddy C', id: '4.1'},
             ],
 
             option2s: [
+                {name: 'T.G. - Adrian C', id: '6.1'},
             ]
 }
 /* END DEFINE CLASSES */
@@ -139,10 +143,13 @@ angular.module('homeworkJournal',[])
                 if (localStorage.getItem('userConfig')){
                     return JSON.parse( localStorage.getItem('userConfig') );
                 } else {
-                    
-                    setTimeout(function (){
-                        bootbox.alert('Hi! If this is your first time, please tell me what classes you have by clicking the "Settings" button.')
-                    },200);
+
+                    if (!haveShownAlert){
+                        haveShownAlert = true;
+                        setTimeout(function (){
+                            bootbox.alert('Hi! If this is your first time, please tell me what classes you have by clicking the "Settings" button.')
+                        },200);
+                    }
 
                     return {
                         year: schoolYears[0],
@@ -200,7 +207,11 @@ angular.module('homeworkJournal',[])
                 })
             }
 
-            $scope.pullHomework(Date.today())
+            
+            //Make sure schoolClasses have loaded
+            setTimeout(function () {
+                $scope.pullHomework(Date.today())
+            },100);
 
             $scope.$on('dateChange',function (event,message){
                 $scope.displayDate = dater (message.date)
