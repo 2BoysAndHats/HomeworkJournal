@@ -102,6 +102,7 @@ module.exports = {
 
         //Get the homework
         params = req.allParams()
+        homeworkStr = params.homework.trim()
 
         HomeworkEntry.findOrCreate({date: params.date, classId: params.subj}).exec(function (err,h){
             if (err) return res.serverError()
@@ -111,10 +112,11 @@ module.exports = {
             //New wiki style version
             h.homework = h.homework || {}
 
-            h.homework[editorName] = {homework: params.homework, date: Date.now()};
+            h.homework[editorName] = {homework: homeworkStr, date: Date.now()};
+
 
             //Delete if hw is blank
-            if (params.homework.trim() == ""){
+            if (homeworkStr == ""){
                 delete h.homework[editorName]
             }
 

@@ -12,40 +12,20 @@ schoolYears = [
     {name: '6th year', id: '6'},
 ]
 
+haveShownAlert = false;
+
 /* START DEFINE CLASSES */
 schoolClasses = {
             baseClasses: [
-                {name: 'da Vinci', id: 'daVinci'}
             ],
 
             scienceClasses: [
-                {name: 'Science - Leona (3.1)', id: '3.1'},
-                {name: 'Science - Yvonne (3.2)', id: '3.2'},
-                {name: 'Science - Niamh (3.3)', id: '3.3'},
-                {name: 'Science - Alison (3.4)', id: '3.4'},
             ],
 
             option1s: [
-                {name: 'T.G. - Paddy C', id: '4.1'},
-                {name: 'Art - Lynn', id: '4.2'},
-                {name: 'Business - Mike', id: '4.3'},
-                {name: 'Home Ec. - Aileen', id: '4.4'},
-                {name: 'Music - Ann Marie', id: '4.5'},
-                {name: 'Home Ec. - Olivia', id: '4.6'},
-                {name: 'Technology - Adrian', id: '4.7'},
-                {name: 'Art - Emma', id: '4.8'},
-                {name: 'T.G. - Paddy W', id: '4.9'},
             ],
 
             option2s: [
-                {name: 'T.G. - Adrian C', id: '6.1'},
-                {name: 'Home Ec. - Olivia', id: '6.2'},
-                {name: 'Music - Susan', id: '6.5'},
-                {name: 'Business - Shauna', id: '6.6'},
-                {name: 'Business - Lisa', id: '6.7'},
-                {name: 'Art - Emma', id: '6.8'},
-                {name: 'Technology - Paddy W', id: '6.9'},
-                {name: 'Woodwork - Paddy C', id: '6.10'}
             ]
 }
 /* END DEFINE CLASSES */
@@ -53,11 +33,6 @@ schoolClasses = {
 
 //This takes internal class codes and turns them into capatilized names
 function parseHomework (hw,uc){
-
-    console.log (window.schoolClasses)
-    console.log (hw)
-    console.log (uc)
-
     hw.forEach(function (h) {
 
         //Wiki style: show the most recent contribution
@@ -117,7 +92,6 @@ function parseHomework (hw,uc){
             groups = Object.keys(window.schoolClasses)
             groups.forEach(function (group) {
                 g = window.schoolClasses[group]
-                console.log(g)
                 g.forEach(function (pair) {
                     if (pair.id == code){
                         h.subject = pair.name;
@@ -167,7 +141,7 @@ angular.module('homeworkJournal',[])
                 } else {
                     
                     setTimeout(function (){
-                        alert('Hi! If this is your first time, please tell me what classes you have by clicking the "Settings" button.')
+                        bootbox.alert('Hi! If this is your first time, please tell me what classes you have by clicking the "Settings" button.')
                     },200);
 
                     return {
@@ -194,20 +168,26 @@ angular.module('homeworkJournal',[])
                 subj = item.subject;
                 currentHw = item.homework;
 
-                hw = prompt ("Homework for " + subj, currentHw)
+                bootbox.prompt ({
+                    title: "Enter homework for " + subj,
+                    size: 'small',
+                    value: currentHw,
+                    callback: function (res){
+                        if (res != null){
 
-                if (hw != undefined){
-                    data = {homework: hw, date: $scope.date, subj: code}
-
-                    //Edit it!
-                    $http.post('/homework/editHomework',data).then(function (res) {
-                        //Refresh the table
-                        $scope.pullHomework($scope.date)
-                        alert ('Edited the homework successfully')
-                    }, function (res) {
-                        alert ('Error while editing homework')
-                    });
-                }
+                            data = {homework: res, date: $scope.date, subj: code}
+                            //Edit it!
+                            $http.post('/homework/editHomework',data).then(function (res) {
+                                //Refresh the table
+                                setTimeout(function (){
+                                    $scope.pullHomework($scope.date)
+                                },100)
+                            }, function (res) {
+                                bootbox.alert ('Error while editing homework')
+                            });
+                        }
+                    }
+                })
             }
 
             $scope.setModal = function (m) {
