@@ -295,3 +295,8 @@ angular.module('homeworkJournal',[])
                 $rootScope.$broadcast('refresh',{})
             }
        })
+       .controller('KudosController', function ($scope, $http){
+           $http.get('/kudos/getTopThree').then (function (res) {
+                $scope.topThree = res.data;
+           })
+       })

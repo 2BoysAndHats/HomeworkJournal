@@ -30,7 +30,7 @@
 
     <!-- Main content -->
     <div class="row align-items-center justify-content-center" style="width:100%;min-height:90%;">
-        <div class = "col-md-5" ng-controller="TableController">
+        <div class = "col-md-5 col-sm-7" ng-controller="TableController">
             <h3 class="text-center">{{displayDate}}</h3>
             <table class="table table-bordered table-hover" id="mainTable">
                 <thead>
@@ -46,7 +46,24 @@
                         </tr>
                 </tbody>
             </table>
-
+        </div>
+        <div class = "col-md-2" ng-controller="KudosController">
+            <center><h4>Top contributors of the last week:</h4></center>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>No. Contributions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="x in topThree">
+                        <td>{{x.user}}</td>
+                        <td>{{x.contributions}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
             <!-- Other homework modal -->
             <div class="modal fade" id="otherHomeworkModal" tabindex="-1" role="dialog" aria-labelledby="otherHomeworkModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -80,6 +97,7 @@
             </div>
             </div>
         </div>
+
     </div>
 </div>
 
