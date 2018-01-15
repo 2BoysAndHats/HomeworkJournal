@@ -34,6 +34,7 @@ module.exports.policies = {
   ***************************************************************************/
   BaseClassController: ['sessionAuth', 'adminOnly'],
   HomeworkController: 'sessionAuth',
+  KudosController: 'sessionAuth',
   HomeworkEntryController: ['sessionAuth', 'adminOnly'],
   YearController: {
     '*': ['sessionAuth','adminOnly'],
