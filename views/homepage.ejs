@@ -30,7 +30,7 @@
 
     <!-- Main content -->
     <div class="row align-items-center justify-content-center" style="width:100%;min-height:90%;">
-        <div class = "col-md-5 col-sm-7" ng-controller="TableController">
+        <div class = "col-md-5 col-sm-7" ng-controller="TableController"> 
             <h3 class="text-center">{{displayDate}}</h3>
             <table class="table table-bordered table-hover" id="mainTable">
                 <thead>
@@ -46,7 +46,43 @@
                         </tr>
                 </tbody>
             </table>
+
+
+
+            <!-- Other homework modal -->
+            <div class="modal fade" id="otherHomeworkModal" tabindex="-1" role="dialog" aria-labelledby="otherHomeworkModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="otherHomeworkModalLabel">Other users' homework</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Homework</th>    
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="(user,userHw) in modalSelected">
+                                        <td>{{user}}</td>
+                                        <td>{{userHw.homework}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+        
         <div class = "col-md-4 col-sm-4" ng-controller="KudosController" style="word-wrap:break-word; border-radius: 8px;">
             <center><h4>Top 3 contributors of the last week:</h4></center>
             <table class="table table-bordered" style="max-width: 100%;">
@@ -64,40 +100,6 @@
                 </tbody>
             </table>
         </div>
-            <!-- Other homework modal -->
-            <div class="modal fade" id="otherHomeworkModal" tabindex="-1" role="dialog" aria-labelledby="otherHomeworkModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="otherHomeworkModalLabel">Other users' homework</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">   
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Homework</th>    
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="(user,userHw) in modalSelected">
-                                <td>{{user}}</td>
-                                <td>{{userHw.homework}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-                </div>
-            </div>
-            </div>
-        </div>
-
     </div>
 </div>
 
